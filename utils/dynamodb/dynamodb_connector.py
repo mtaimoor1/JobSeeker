@@ -11,5 +11,7 @@ class Connector:
         if self.con:
             return self.con
         else:
-            return boto3.client("dynamodb", aws_access_key_id=os.environ.get("aws-access-key"),
-                                aws_secret_access_key=os.environ.get("aws-secret-key"))
+            return boto3.resource("dynamodb", aws_access_key_id=os.environ.get("aws_access_key"),
+                                  aws_secret_access_key=os.environ.get("aws_secret_key"),
+                                  region_name=os.environ.get("region", "ap-southeast-1"))
+
