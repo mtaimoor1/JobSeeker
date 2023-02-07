@@ -1,4 +1,5 @@
 from .dynamodb_connector import Connector
+from boto3.dynamodb.conditions import Key
 
 dynamo = Connector()
 
@@ -23,5 +24,16 @@ class DynamoQuery:
             result.extend(response["Items"])
         return result
 
-    def query_table(self, query):
-        pass
+    def query_table(self, table, job_title):
+        table = self.con.Table(table)
+        response = table.query(
+            KeyConditionExpression=Key('job_title').eq(job_title)
+        )
+        result = response['Items']
+        while "LastEvaluatedKey" in response:
+            response = table.query(
+                KeyConditionExpression=Key('job_title').eq(job_title),
+                ExclusiveStartKey=response["LastEvaluatedKey"]
+            )
+            result.extend(response["Items"])
+        return result
