@@ -16,6 +16,8 @@ COPY . .
 
 RUN export PYTHONPATH=${APP_HOME}
 
-WORKDIR pipeline_api/
+ENV aws_access_key="${aws_access_key}"
 
-CMD ["uvicorn", "main:app"]
+ENV aws_secret_key="${aws_secret_key}"
+
+CMD ["uvicorn", "pipeline_api.main:app", "--host", "0.0.0.0", "--port", "80"]
