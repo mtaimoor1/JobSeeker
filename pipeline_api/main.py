@@ -20,12 +20,13 @@ def get_tables():
     return dynamo.list_tables()
 
 
-@app.get('/records_all/{table}')
-def get_all_items(table: str):
-    return dynamo.get_all_records(table)
-
-
-@app.get("/record")
+@app.get("/records")
 def get_filtered_record(table: str, job: str):
     logging.info(f"Table Name: {table} Job Title {job}")
     return dynamo.query_table(table, job)
+
+
+@app.get('/records/{table}')
+def get_all_items(table: str):
+    return dynamo.get_all_records(table)
+
