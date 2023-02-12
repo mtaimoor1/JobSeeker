@@ -1,7 +1,13 @@
+import sys
+from botocore.exceptions import ClientError
 from .dynamodb_connector import Connector
 from boto3.dynamodb.conditions import Key
+import logging
+
 
 dynamo = Connector()
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class DynamoQuery:
@@ -17,7 +23,10 @@ class DynamoQuery:
 
     def get_all_records(self, name):
         table = self.con.Table(name)
-        response = table.scan()
+        try:
+            response = table.scan()
+        except ClientError as exception:
+            return [exception.response["Error"]]
         result = response["Items"]
         while "LastEvaluatedKey" in response:
             response = table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
@@ -26,9 +35,12 @@ class DynamoQuery:
 
     def query_table(self, table, job_title):
         table = self.con.Table(table)
-        response = table.query(
-            KeyConditionExpression=Key('job_title').eq(job_title)
-        )
+        try:
+            response = table.query(
+                KeyConditionExpression=Key('job_title').eq(job_title)
+            )
+        except ClientError as exception:
+            return [exception.response["Error"]]
         result = response['Items']
         while "LastEvaluatedKey" in response:
             response = table.query(
