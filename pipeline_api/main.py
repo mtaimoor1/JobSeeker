@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, status
-from utils.dynamodb.query_dynamo import DynamoQuery
+from utils.mongoDB.query_mongo import MongoQuery
 import sys
 import os
 import logging
@@ -12,30 +12,23 @@ logging.basicConfig(
 )
 
 app = FastAPI()
-dynamo = DynamoQuery()
+mongo = MongoQuery()
 
 
 @app.get('/list_tables')
 def get_tables():
-    return dynamo.list_tables()
+    return mongo.list_tables()
 
 
 @app.get("/records")
 def get_filtered_record(table: str, job: str):
-    result = dynamo.query_table(table, job)
+    result = mongo.query_table(table, job)
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Job with title {job} not found in the table {table}")
-    if result[0].get("Code", "") == "ResourceNotFoundException":
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Resource not found check the table name")
     return result
 
 
 @app.get('/records/{table}')
 def get_all_items(table: str):
-    response = dynamo.get_all_records(table)
-    if response[0].get("Code", "") == "ResourceNotFoundException":
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Resource not found check the table name")
-    return response
+    return mongo.get_all_records(table)
